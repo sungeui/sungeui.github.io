@@ -1,4 +1,7 @@
-name: Generate Sitemap
+permissions:
+  contents: write
+  
+  name: Generate Sitemap
 
 on:
   push:
