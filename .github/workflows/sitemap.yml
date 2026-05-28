@@ -1,13 +1,14 @@
-permissions:
-  contents: write
-  
+
   name: Generate Sitemap
 
 on:
   push:
     branches:
       - main
-
+      
+permissions:
+  contents: write
+  
 jobs:
   sitemap:
     runs-on: ubuntu-latest
