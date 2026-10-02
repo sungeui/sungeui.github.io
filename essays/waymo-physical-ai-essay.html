@@ -1,0 +1,854 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>데모를 넘어 제품으로: Waymo의 긴 여정이 Physical AI에 주는 교훈 | 윤성의의 잡동사니</title>
+  <meta name="description" content="자율주행의 긴 역사에서 배우는 Agent–Simulator–Critic–Eval, 그리고 Physical AI 연구와 창업의 교훈" />
+  <style>
+    :root {
+      --text: #222;
+      --muted: #666;
+      --line: #e7e7e7;
+      --bg: #fff;
+      --quote-bg: #f7f7f7;
+      --note-bg: #fafafa;
+      --note-border: #d9d9d9;
+      --link: #23527c;
+      --strong: #111;
+    }
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", Arial, sans-serif;
+      line-height: 1.82;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+    }
+    .page {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 28px 22px 64px;
+    }
+    nav {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 34px;
+      font-size: 0.95rem;
+    }
+    a { color: var(--link); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .date {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+    }
+    h1 {
+      font-size: clamp(2rem, 5vw, 3.1rem);
+      line-height: 1.2;
+      letter-spacing: -0.035em;
+      margin: 0 0 12px;
+      font-weight: 800;
+    }
+    .subtitle {
+      font-size: 1.25rem;
+      color: #444;
+      margin: 0 0 8px;
+      line-height: 1.55;
+    }
+    .byline {
+      color: var(--muted);
+      margin: 0 0 10px;
+      font-size: 0.98rem;
+    }
+    hr {
+      border: 0;
+      border-top: 1px solid var(--line);
+      margin: 30px 0;
+    }
+    p { margin: 1.05em 0; }
+    h2 {
+      font-size: 1.45rem;
+      line-height: 1.35;
+      margin: 2.2em 0 0.8em;
+      letter-spacing: -0.02em;
+    }
+    h3 {
+      font-size: 1.14rem;
+      line-height: 1.45;
+      margin: 1.8em 0 0.6em;
+      letter-spacing: -0.012em;
+    }
+    strong { color: var(--strong); }
+    blockquote {
+      margin: 1.35em 0;
+      padding: 1.05em 1.25em;
+      border-left: 4px solid #d6d6d6;
+      background: var(--quote-bg);
+      color: #333;
+      font-size: 1.04rem;
+    }
+    blockquote p { margin: 0.25em 0; }
+    ul, ol {
+      margin: 1em 0 1em 1.3em;
+      padding: 0;
+    }
+    li { margin: 0.35em 0; }
+    .lead-quote {
+      text-align: center;
+      background: transparent;
+      border-left: 0;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      padding: 1.2em 0;
+      font-size: 1.12rem;
+      font-weight: 600;
+    }
+    .term-note {
+      margin: 1.25em 0;
+      padding: 0.95em 1.1em;
+      background: var(--note-bg);
+      border: 1px solid var(--note-border);
+      border-radius: 8px;
+      color: #444;
+      font-size: 0.96rem;
+    }
+    .term-note .term-title {
+      display: block;
+      margin-bottom: 0.35em;
+      font-weight: 700;
+      color: #333;
+    }
+    .summary-box {
+      margin: 1.6em 0;
+      padding: 1.15em 1.25em;
+      background: #f8f8f8;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .summary-box p:first-child { margin-top: 0; }
+    .summary-box p:last-child { margin-bottom: 0; }
+    .flow {
+      margin: 1.4em 0;
+      padding: 1em 1.15em;
+      background: #fafafa;
+      border-left: 4px solid #cfcfcf;
+      font-size: 0.98rem;
+      line-height: 1.9;
+    }
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      margin: 1.25em 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    th, td {
+      text-align: left;
+      vertical-align: top;
+      padding: 0.7em 0.75em;
+      border-bottom: 1px solid var(--line);
+    }
+    th {
+      background: #f7f7f7;
+      font-weight: 700;
+    }
+    .small {
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+    .sources {
+      font-size: 0.93rem;
+      color: #444;
+    }
+    .sources li { margin-bottom: 0.55em; }
+    .disclaimer {
+      margin-top: 42px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    @media (max-width: 520px) {
+      .page { padding: 22px 18px 52px; }
+      body { line-height: 1.78; }
+      nav { margin-bottom: 28px; }
+      .term-note { padding: 0.9em 1em; }
+      th, td { min-width: 120px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <nav>
+      <a href="./">← Essays</a>
+      <a href="https://sungeui.github.io/">Home</a>
+      <a href="https://sgvr.kaist.ac.kr/">Publications</a>
+    </nav>
+
+    <div class="date">Published on 2026.10.02</div>
+    <h1>데모를 넘어 제품으로</h1>
+    <p class="subtitle">Waymo의 긴 여정이 Physical AI 연구와 창업에 주는 교훈</p>
+    <p class="byline">by 윤성의 (Sung-eui Yoon)</p>
+    <p><a href="#sources">References</a> · <a href="https://sungeui.github.io/essays/disclaimer.html">Disclaimer</a></p>
+
+    <hr />
+
+    <blockquote class="lead-quote">
+      <p>“Physical AI의 진짜 경쟁력은 하나의 똑똑한 Agent를 만드는 데서 끝나지 않는다. Agent–Simulator–Critic–Eval을 연결해 현실에서 계속 배우는 시스템을 만드는 데 있다.”</p>
+    </blockquote>
+
+    <hr />
+
+    <p>요즘 Physical AI에 대한 관심이 매우 뜨겁다. Humanoid robot, Vision-Language-Action model(VLA), robot foundation model을 비롯해 놀라운 결과가 거의 매주 발표된다. 로봇이 자연어 지시를 이해하고, 처음 보는 물체를 조작하며, 복잡한 환경을 돌아다니는 동영상을 보면 이제 정말 범용 로봇이 멀지 않은 것처럼 느껴진다.</p>
+
+    <p>이런 시점에 Waymo의 자율주행 역사를 돌아보는 것은 꽤 의미가 있다. 자율주행 역시 한때 지금의 Physical AI와 매우 비슷한 기대를 받았기 때문이다.</p>
+
+    <p>그리고 Waymo가 최근 보여 주고 있는 결과를 보면 두 가지를 동시에 인정해야 한다.</p>
+
+    <p>하나는, 자율주행은 많은 사람들이 기대했던 것보다 훨씬 어려웠다는 것이다.</p>
+
+    <p>그러나 다른 하나는, 그렇다고 자율주행이 실패한 기술은 아니라는 것이다. 아주 긴 시간이 걸렸지만 Waymo는 결국 완전 무인 자율주행을 연구 데모에서 실제 서비스로 가져왔다.</p>
+
+    <p>2026년 현재 Waymo는 <strong>매주 50만 회가 넘는 완전자율주행 탑승</strong>을 제공하고 있으며, 미국 15곳 이상의 주요 도시에서 운영 경험을 축적하고 있다고 밝히고 있다. 2025년 한 해에만 약 1,500만 회의 탑승을 제공했고, 누적 탑승은 2천만 회를 넘어섰다. 이제 Waymo는 “자율주행이 가능함을 보여 주는 회사”를 넘어, 실제 승객을 매주 수십만 번 운송하는 서비스 사업자가 되었다.</p>
+
+    <div class="summary-box">
+      <p><strong>이 글에서 던지고 싶은 질문은 하나다.</strong></p>
+      <p>2010년 전후 이미 놀라운 자율주행 데모가 있었는데, 왜 실제 제품까지 10년 이상이 더 걸렸을까? 그리고 그 오랜 시간을 거쳐 Waymo가 결국 제품화의 문턱을 넘을 수 있었던 핵심은 무엇이었을까?</p>
+    </div>
+
+    <hr />
+
+    <h2>자율주행은 생각보다 오래된 꿈이다</h2>
+
+    <p>현대 자율주행 연구의 중요한 전환점 중 하나는 2004년 DARPA Grand Challenge였다. 약 142마일의 사막 코스를 운전자 없이 달리는 것이 목표였지만, 첫 대회에서는 완주한 차량이 한 대도 없었다. 가장 멀리 간 차량도 7.5마일에 그쳤다.</p>
+
+    <p>그런데 불과 1년 뒤인 2005년에는 Stanford의 Stanley를 포함해 다섯 대의 차량이 132마일 코스를 완주했다. 다시 2007년 Urban Challenge에서는 차량들이 교통 속에서 합류, 추월, 주차, 교차로 통과까지 수행했고 여섯 팀이 완주했다.</p>
+
+    <p>Google은 2009년 Self-Driving Car Project를 시작했고, 비교적 짧은 시간 안에 낮과 밤, 고속도로와 일반도로, 보행자와 자전거, 교통신호와 공사구간을 다루는 인상적인 자율주행 능력을 보여 주었다. 2010년대 중후반 deep learning의 발전과 함께 자율주행에는 엄청난 투자와 기대가 몰렸다.</p>
+
+    <blockquote>
+      <p>당시 수많은 데모를 보면 “이 정도면 자율주행은 거의 해결된 것 아닌가?”라는 생각을 하는 것이 자연스러웠다.</p>
+    </blockquote>
+
+    <p>하지만 robotics와 autonomous systems를 오래 연구한 사람들 가운데에는 상당히 조심스러운 시각도 있었다. Rodney Brooks를 비롯한 여러 전문가들은 2010년대 후반, 현실 세계에 끝없이 등장하는 예외 상황과 인간과의 복잡한 상호작용 때문에 완전자율주행의 빠른 보급은 쉽지 않을 것이라고 지적했다.</p>
+
+    <p>돌이켜보면 그 회의론은 상당 부분 옳았다. 자율주행은 예상보다 훨씬 오래 걸렸다.</p>
+
+    <p>그러나 여기에서 역사를 멈추면 안 된다.</p>
+
+    <p>Google의 자율주행 프로젝트가 시작된 것은 2009년이었지만, Phoenix에서 일반 대중이 운전석에 사람이 없는 fully driverless 차량을 호출할 수 있게 된 것은 2020년 10월이었다. 그리고 다시 여러 해가 지나, 2026년에는 매주 50만 회 이상의 탑승이 이루어지는 단계까지 왔다.</p>
+
+    <blockquote>
+      <p><strong>자율주행은 예상보다 훨씬 어려웠다. 그러나 결국 상당한 규모의 실제 Physical AI 서비스가 되기 시작했다.</strong></p>
+    </blockquote>
+
+    <p>이 두 문장을 동시에 받아들이는 것이 중요하다.</p>
+
+    <hr />
+
+    <h2>Demo가 되는 것과 Product가 되는 것은 다른 문제다</h2>
+
+    <p>Waymo의 경험에서 가장 기억할 만한 표현 가운데 하나는 “작동하는 demo는 전체 일의 1%에 불과하다”는 것이다.</p>
+
+    <p>연구 데모에서는 복잡한 도로를 한 번 성공적으로 달리는 것도 대단한 결과다. 그러나 실제 서비스에서는 질문 자체가 바뀐다.</p>
+
+    <blockquote>
+      <p>“이 차가 자율주행할 수 있는가?”가 아니라,</p>
+      <p><strong>“사람의 개입 없이 매일 수십만 번 운행하면서도 계속 안전할 수 있는가?”</strong>가 된다.</p>
+    </blockquote>
+
+    <div class="term-note">
+      <span class="term-title">용어 메모 — Long tail(롱테일)</span>
+      대부분은 매우 드물지만 종류가 너무 많아서, 대규모 서비스에서는 결국 계속 만나게 되는 희귀 상황들의 집합을 뜻한다. 예를 들어 특이한 공사 수신호, 도로 위의 예상 밖 물체, 비정상적인 보행자 행동은 각각 드물 수 있지만 수백만 마일을 운행하면 이런 희귀 상황 가운데 무엇인가는 매일 나타난다.
+    </div>
+
+    <p>어떤 사건이 100만 마일에 한 번 발생한다고 해보자. 연구실에서 몇 천 마일을 시험할 때에는 한 번도 만나지 않을 수 있다. 하지만 fleet 전체가 매주 수백만 마일을 달린다면 그 사건은 운영 관점에서 더 이상 “rare event”가 아니다.</p>
+
+    <p><strong>Scale이 커질수록 long tail 자체가 problem space가 된다.</strong></p>
+
+    <hr />
+
+    <h2>“몇 개의 9가 필요한가?”</h2>
+
+    <p>여기서 Waymo가 강조하는 사고방식이 reliability의 <strong>nines</strong>다.</p>
+
+    <p>99% → 99.9% → 99.99% → 99.999%처럼 성능과 신뢰성을 높여가는 것이다.</p>
+
+    <div class="term-note">
+      <span class="term-title">용어 메모 — Nines</span>
+      시스템 신뢰성을 표현하는 엔지니어링 용어다. 99%는 “two nines”, 99.9%는 “three nines”라고 부른다. 중요한 것은 9를 하나 더 붙일 때마다 필요한 노력이 급격히 증가하고, 때로는 완전히 다른 기술이나 시스템 설계가 필요하다는 점이다.
+    </div>
+
+    <p>YouTube에 올릴 로봇 데모라면 80~90% 성공률도 훌륭할 수 있다. 사람이 항상 옆에서 개입할 수 있는 assistive system이라면 요구되는 reliability는 또 다르다. 하지만 어린이가 뛰어다니는 도로에서 사람 없이 움직이는 자동차라면 필요한 수준이 완전히 달라진다.</p>
+
+    <p>그리고 다음 9를 얻는 방법이 이전 9를 얻는 방법과 같다는 보장도 없다. 처음에는 model 성능을 개선하면 된다. 그다음에는 sensor redundancy가 필요할 수 있다. 다음에는 failure detection, runtime validation, backup architecture, operational procedure가 필요할 수 있다.</p>
+
+    <p>즉 마지막 몇 개의 9는 단순한 model optimization이 아니라 <strong>system architecture의 문제</strong>가 된다.</p>
+
+    <hr />
+
+    <h2>그렇다면 2010년대 후반의 회의론을 무엇이 넘어섰을까?</h2>
+
+    <p>이 질문이 이 글의 핵심이다.</p>
+
+    <p>자율주행에 회의적이었던 연구자들이 단순히 틀렸던 것은 아니다. 그들이 지적한 문제는 실제로 존재했다.</p>
+
+    <ul>
+      <li>끝없이 나타나는 edge case와 long tail</li>
+      <li>불완전한 perception과 sensor failure</li>
+      <li>악천후와 조명 변화</li>
+      <li>인간 운전자·보행자와의 복잡한 상호작용</li>
+      <li>실제 도로에서 충분한 안전 테스트를 하기 어려운 문제</li>
+      <li>매우 높은 reliability 요구</li>
+    </ul>
+
+    <p>그렇다면 무엇이 달라졌을까?</p>
+
+    <p>제 생각에는 <strong>하나의 breakthrough가 이 문제를 해결했다고 보는 것은 정확하지 않다.</strong> 더 큰 neural network 하나가 등장해서 모든 문제가 사라진 것이 아니다.</p>
+
+    <p>오히려 여러 기술과 시스템이 함께 성숙하면서 제품화의 임계점을 넘어선 것에 가깝다.</p>
+
+    <hr />
+
+    <h2>첫째, “모든 곳에서 운전”하려 하지 않았다</h2>
+
+    <p>Waymo가 취한 중요한 접근 가운데 하나는 문제를 명확하게 제한하는 것이다.</p>
+
+    <p>현재의 Waymo는 어디에서나, 어떤 날씨에서나, 어떤 도로에서나 운전할 수 있는 완전 범용 Level 5 시스템이 아니다. 정해진 조건과 영역에서 운전자가 필요 없는 <strong>Level 4 autonomy</strong>를 제공한다.</p>
+
+    <div class="term-note">
+      <span class="term-title">용어 메모 — Level 4와 Level 5</span>
+      <strong>Level 4(L4)</strong>는 정해진 조건과 운행 영역 안에서는 인간의 개입 없이 시스템이 운전을 책임지는 단계다. <strong>Level 5(L5)</strong>는 장소·날씨·도로 종류 등에 사실상 제한 없이 인간이 운전할 수 있는 모든 상황을 처리하는 것을 목표로 한다.
+    </div>
+
+    <div class="term-note">
+      <span class="term-title">용어 메모 — ODD(Operational Design Domain)</span>
+      자율 시스템이 동작하도록 설계되고 검증된 조건의 범위를 의미한다. 특정 도시나 도로 유형, 속도 범위, 날씨 조건 등이 포함될 수 있다. 쉽게 말해 “이 시스템이 책임지고 잘할 수 있다고 약속하는 세계의 범위”다.
+    </div>
+
+    <p>이것은 단순히 어려운 문제를 피해 간 것이라고 보기 어렵다. 오히려 Physical AI 제품화의 중요한 원칙이다.</p>
+
+    <blockquote>
+      <p><strong>처음부터 세상 전체를 해결하려 하지 않고, 높은 reliability를 실제로 달성할 수 있는 영역을 명확히 정의한 뒤 그 영역을 점진적으로 넓힌다.</strong></p>
+    </blockquote>
+
+    <p>즉 범용성을 먼저 얻고 reliability를 나중에 올린 것이 아니라, <strong>reliability를 달성한 영역을 하나씩 확장해온 것</strong>에 가깝다.</p>
+
+    <hr />
+
+    <h2>둘째, 하나의 영리한 센서보다 Redundancy를 택했다</h2>
+
+    <p>Waymo는 camera, lidar, radar를 함께 사용한다. Camera는 색상과 고해상도 semantic information에 강하고, lidar는 정확한 3차원 geometry를 측정하며, radar는 속도 측정과 일부 악조건에서 강점을 가진다.</p>
+
+    <div class="term-note">
+      <span class="term-title">용어 메모 — Redundancy(중복성)</span>
+      하나의 component가 실패하더라도 다른 component가 기능을 유지할 수 있도록 독립적인 정보원이나 시스템을 함께 두는 설계다. 중요한 것은 단순히 센서를 여러 개 다는 것이 아니라, 서로 다른 물리적 특성을 가진 센서가 서로의 약점을 보완하게 하는 것이다.
+    </div>
+
+    <p>Digital AI에서는 틀린 답변을 다시 생성할 수 있는 경우가 많다. Physical AI에서는 한 번의 잘못된 판단이 되돌릴 수 없는 물리적 결과를 만들 수 있다. 그래서 평균 성능만 높은 model을 넘어 <strong>failure에 강한 architecture</strong>가 필요하다.</p>
+
+    <hr />
+
+    <h2>셋째, 더 큰 AI Model을 사용했지만 Black Box만으로 가지 않았다</h2>
+
+    <p>Deep learning, Transformer, VLM, foundation model의 발전은 당연히 중요했다. Waymo도 많은 작은 model을 더 통합된 고용량 model로 바꾸고, world knowledge와 multimodal representation을 적극 활용하고 있다.</p>
+
+    <p>하지만 흥미로운 점은 이것이 “sensor에서 steering까지 모든 것을 하나의 black-box neural network에 맡기자”는 결론으로 가지 않는다는 것이다.</p>
+
+    <div class="term-note">
+      <span class="term-title">용어 메모 — End-to-End(E2E)</span>
+      입력에서 최종 행동까지의 전체 과정을 하나의 학습 시스템으로 직접 최적화하는 접근이다. 자율주행이라면 camera·lidar 등의 sensor input에서 최종 trajectory나 steering command까지 직접 학습하는 형태를 생각할 수 있다.
+    </div>
+
+    <p>Waymo는 대규모 learned model을 적극적으로 사용하면서도, proposed trajectory가 물리적 constraint나 안전 규칙을 위반하지 않는지 확인하는 validation 구조를 함께 둔다.</p>
+
+    <blockquote>
+      <p><strong>Learning을 최대한 활용하되, safety-critical structure까지 없애지는 않는다.</strong></p>
+    </blockquote>
+
+    <p>이 원칙은 자율주행뿐 아니라 다른 Physical AI에도 꽤 중요할 수 있다.</p>
+
+    <hr />
+
+    <h2>넷째, Simulator가 또 하나의 핵심 AI가 되었다</h2>
+
+    <p>Physical AI에서 현실 세계의 모든 위험 상황을 직접 시험할 수는 없다. 보행자가 갑자기 자동차 앞으로 뛰어드는 상황을 수천 번 실제 도로에서 의도적으로 만들어볼 수는 없다.</p>
+
+    <p>그리고 실제 세계에는 더 근본적인 한계가 있다.</p>
+
+    <p><strong>실제로 일어난 결과 하나밖에 볼 수 없다.</strong></p>
+
+    <p>자동차가 급제동해서 보행자를 피했다면 우리는 그 행동의 결과만 본다. 하지만 실제로 알고 싶은 것은 다음과 같은 질문들이다.</p>
+
+    <ul>
+      <li>0.2초 늦게 braking했다면?</li>
+      <li>조금 왼쪽으로 피했다면?</li>
+      <li>보행자가 더 빨리 달려왔다면?</li>
+      <li>비가 내리고 있었다면?</li>
+      <li>옆 차가 동시에 끼어들었다면?</li>
+    </ul>
+
+    <div class="term-note">
+      <span class="term-title">용어 메모 — Counterfactual(반사실적 가정)</span>
+      “실제로 일어난 것과 다르게 행동했다면 무슨 일이 일어났을까?”를 묻는 것이다. 실제 차량이 급제동했다면 “급제동하지 않았다면?”, “0.5초 늦게 제동했다면?”, “옆 차선으로 피했다면?” 같은 다른 가능한 미래를 비교해 보는 것이다. 현실에서는 하나의 미래만 경험할 수 있지만 simulation에서는 수천 개의 다른 미래를 시험할 수 있다.
+    </div>
+
+    <p>이 counterfactual을 대규모로 만들어볼 수 있다는 것이 simulation의 엄청난 장점이다.</p>
+
+    <hr />
+
+    <h2>Open-loop를 넘어 Closed-loop Simulation으로</h2>
+
+    <p>단순히 과거 주행 영상을 재생하면서 “이 장면에서 무엇을 할 것인가?”를 묻는 것만으로는 충분하지 않다. Agent의 행동 자체가 세상을 변화시키기 때문이다.</p>
+
+    <p>자동차가 brake를 밟으면 뒤차의 행동이 바뀔 수 있다. 차선을 변경하면 주변 차량들이 반응한다. Robot이 물체를 밀면 물체의 위치가 변하고, 다음 camera image와 tactile signal도 달라진다.</p>
+
+    <div class="term-note">
+      <span class="term-title">용어 메모 — Open-loop vs. Closed-loop</span>
+      <strong>Open-loop evaluation</strong>은 기록된 상황을 보고 “이 상태에서 어떤 행동을 할 것인가?”를 평가하는 방식이다. Agent의 행동이 이후 상황을 바꾸지는 않는다. <strong>Closed-loop simulation</strong>에서는 Agent가 행동하면 simulated world가 변하고, Agent는 변화된 세상을 다시 관찰해 다음 행동을 결정한다. 실제 Physical AI는 본질적으로 closed loop다.
+    </div>
+
+    <p>Waymo는 large-scale closed-loop simulation을 one-in-a-million 수준의 rare event까지 시험하고 검증하기 위한 핵심 기술로 설명한다.</p>
+
+    <hr />
+
+    <h2>World Model: “내가 이렇게 행동하면 세상이 어떻게 변할까?”</h2>
+
+    <div class="term-note">
+      <span class="term-title">용어 메모 — World Model</span>
+      현재 상태와 Agent의 행동을 바탕으로 앞으로 세상이 어떻게 변화할지를 모델링하는 시스템이다. 쉽게 말하면 “내가 이렇게 행동하면 다음 순간 세상은 어떻게 될까?”를 예측한다.
+    </div>
+
+    <p>자동차에서는 주변 차량과 보행자의 움직임, 교통 상황, camera·lidar observation을 예측할 수 있다. Manipulation에서는 robot hand가 물체를 밀거나 잡았을 때 object pose, contact, force, tactile observation이 어떻게 변할지를 모델링할 수 있다.</p>
+
+    <p>Waymo는 2026년 camera와 lidar 관측까지 생성할 수 있는 generative <strong>Waymo World Model</strong>을 공개했다. 회사 설명에 따르면 Waymo Driver는 실제 도로뿐 아니라 virtual world에서 billions of miles를 경험하며 rare scenario를 학습하고 검증한다.</p>
+
+    <p>World Model이 좋아질수록 Physical AI는 실제 세계에서 위험한 시행착오를 하기 전에 <strong>가상의 세계에서 먼저 경험을 축적</strong>할 수 있다.</p>
+
+    <hr />
+
+    <h2>다섯째, Simulator만으로는 부족하다 — Critic이 필요하다</h2>
+
+    <p>Simulator가 수백만 개의 상황과 미래를 만들어 냈다고 생각해 보자. 그러면 새로운 문제가 생긴다.</p>
+
+    <blockquote>
+      <p><strong>“그 수백만 개 결과 중 무엇이 좋은 행동이고 무엇이 나쁜 행동인가?”</strong></p>
+    </blockquote>
+
+    <p>여기서 Critic이 등장한다.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>구성 요소</th>
+            <th>핵심 질문</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Agent</strong></td>
+            <td>지금 무엇을 해야 하는가?</td>
+          </tr>
+          <tr>
+            <td><strong>Simulator / World Model</strong></td>
+            <td>그렇게 행동하면 어떤 일이 일어나는가?</td>
+          </tr>
+          <tr>
+            <td><strong>Critic</strong></td>
+            <td>그 결과는 얼마나 좋은가?</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>예를 들어 차량이 보행자를 보고 braking했고 사고가 나지 않았다고 하자. 단순한 성공/실패 평가라면 성공이다.</p>
+
+    <p>하지만 좋은 Critic은 더 많은 질문을 한다.</p>
+
+    <ul>
+      <li>보행자와의 최소 거리는 충분했는가?</li>
+      <li>Time-to-collision margin은 충분했는가?</li>
+      <li>braking이 너무 늦지는 않았는가?</li>
+      <li>지나치게 급하게 제동해 승객의 안전과 comfort를 해치지는 않았는가?</li>
+      <li>뒤차에 새로운 위험을 만들지는 않았는가?</li>
+      <li>교통 규칙을 지켰는가?</li>
+      <li>더 안전하면서 부드러운 trajectory가 가능하지 않았는가?</li>
+    </ul>
+
+    <div class="term-note">
+      <span class="term-title">용어 메모 — Critic</span>
+      여기서 Critic은 강화학습에서 말하는 하나의 value network만을 의미하지 않는다. 더 넓게는 <strong>Agent의 행동과 결과를 평가하고, 문제점을 찾아내고, 다음 학습에 사용할 신호를 만드는 evaluation intelligence</strong>를 뜻한다. 실제 시스템에서는 learned evaluator뿐 아니라 safety rule, physics constraint, traffic law, reward model, statistical metric, human expert evaluation 등이 함께 사용될 수 있다.
+    </div>
+
+    <p>Critic의 더 중요한 역할은 단순히 점수를 주는 것이 아니라 <strong>Agent가 아직 무엇을 못하는지를 찾아내는 것</strong>이다.</p>
+
+    <p>가령 simulation을 수백만 번 돌렸더니 “비 오는 밤 + 공사구간 + 주차 차량에 가려진 보행자 + 동시에 옆 차가 끼어드는 상황”에서 safety margin이 반복적으로 낮아졌다고 해보자.</p>
+
+    <p>Critic이 이 weakness를 찾아내면 Simulator는 그 주변을 더 많이 변형할 수 있다. 보행자의 timing, 차량 속도, 빗줄기, 조명, 다른 차의 움직임, sensor degradation 등을 바꿔 수천 개의 hard case를 만든다.</p>
+
+    <p>그리고 Agent는 그 사례를 다시 학습한다.</p>
+
+    <blockquote>
+      <p><strong>System이 자신의 약점을 찾아 다음 training data를 만들어낸다.</strong></p>
+    </blockquote>
+
+    <hr />
+
+    <h2>Agent–Simulator–Critic Flywheel</h2>
+
+    <p>이제 세 요소를 연결해 보자.</p>
+
+    <div class="flow">
+      <strong>Real-world Deployment</strong><br />
+      ↓ 새로운 상황과 failure 발견<br />
+      <strong>Data</strong><br />
+      ↓ 실제 세계로 Simulator를 보정<br />
+      <strong>Simulator / World Model</strong><br />
+      ↓ rare case와 counterfactual 생성<br />
+      <strong>Agent</strong><br />
+      ↓ 수많은 행동 시도<br />
+      <strong>Critic</strong><br />
+      ↓ 실패와 약점 발견<br />
+      <strong>Training</strong><br />
+      ↓ Agent 개선<br />
+      <strong>Eval &amp; Safety Validation</strong><br />
+      ↓ 충분히 검증된 version 배포<br />
+      <strong>Better Real-world Deployment</strong><br />
+      ↓ 더 많은 data → 다시 반복
+    </div>
+
+    <div class="term-note">
+      <span class="term-title">용어 메모 — Flywheel(플라이휠)</span>
+      한 번 돌기 시작하면 각 단계가 다음 단계를 강화하고, 그 결과가 다시 처음 단계로 돌아와 점점 더 빠르게 개선되는 선순환 구조를 뜻한다. Physical AI에서는 deployment가 늘어날수록 data와 failure case가 쌓이고, 그것이 simulation과 evaluation을 개선하며, 다시 더 좋은 Agent를 만드는 구조가 될 수 있다.
+    </div>
+
+    <p>이 loop에서 중요한 것은 세 시스템이 함께 발전한다는 점이다. Agent가 좋아지면 기존 Critic으로는 차이를 구별하기 어려워질 수 있다. 새로운 failure가 발견되면 Simulator가 그것을 재현해야 한다. Simulation과 실제 세계의 차이가 발견되면 World Model 역시 좋아져야 한다.</p>
+
+    <p>따라서 “model을 한 번 학습해서 제품을 만든다”는 사고방식과는 완전히 다르다.</p>
+
+    <blockquote>
+      <p><strong>제품 자체가 지속적으로 배우는 machine이 된다.</strong></p>
+    </blockquote>
+
+    <hr />
+
+    <h2>결국 회의론을 이긴 것은 “더 좋은 Neural Network 하나”가 아니었다</h2>
+
+    <p>2010년대 후반의 회의론으로 다시 돌아가 보자. 당시 제기되던 어려움은 실제로 맞았다. 흥미로운 것은 Waymo가 그것들을 어떤 방식으로 바꾸어 갔느냐이다.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>당시의 어려운 질문</th>
+            <th>지금 보이는 대응</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>끝없는 edge case를 어떻게 다룰 것인가?</td>
+            <td>대규모 closed-loop simulation + generative world model</td>
+          </tr>
+          <tr>
+            <td>실제 도로에서 위험 상황을 충분히 시험할 수 있는가?</td>
+            <td>Simulation + counterfactual evaluation + real-world fleet data</td>
+          </tr>
+          <tr>
+            <td>Neural network가 잘못된 행동을 하면 어떻게 막을 것인가?</td>
+            <td>Learned model + structure + runtime validation + critic</td>
+          </tr>
+          <tr>
+            <td>센서 하나가 보지 못하는 상황은?</td>
+            <td>Multimodal sensing + redundancy</td>
+          </tr>
+          <tr>
+            <td>모든 도로와 날씨를 한꺼번에 해결할 수 있는가?</td>
+            <td>명확한 ODD에서 L4를 먼저 달성하고 점진적으로 확장</td>
+          </tr>
+          <tr>
+            <td>Rare case data가 거의 없다면 어떻게 학습하는가?</td>
+            <td>Simulator가 hard case를 생성하고 Critic이 평가</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>따라서 Waymo의 발전을 “AI model이 충분히 커져서 문제가 해결됐다”고 이해하면 중요한 부분을 놓치게 된다.</p>
+
+    <p>더 정확하게는 다음과 같은 것들이 함께 성숙하면서 product threshold를 넘어선 것이다.</p>
+
+    <blockquote>
+      <p><strong>Better Models + Multimodal Sensing + Explicit Structure + Closed-loop Simulation + World Models + Critic + Evaluation + Safety Framework + Massive Real-world Experience</strong></p>
+    </blockquote>
+
+    <h3>회의론은 틀린 것이 아니라 제품으로 가는 길을 알려준 셈이다</h3>
+
+    <p>그래서 “낙관론이 비관론을 이겼다”라고만 표현하는 것도 정확하지 않다.</p>
+
+    <p>당시 회의적인 연구자들이 말한 핵심은 대체로 “지금의 기술을 그대로 조금 더 개선한다고 해서 곧바로 완전 자율주행이 되지는 않을 것”이라는 것이었다.</p>
+
+    <p>실제로 Waymo가 해야 했던 일도 perception accuracy를 몇 퍼센트 높이는 정도가 아니었다. 문제의 범위를 다시 정의하고, hardware와 sensor architecture를 바꾸고, 거대한 simulation infrastructure를 만들고, failure를 찾는 Critic과 evaluation 체계를 만들고, 실제 fleet의 data를 다시 training으로 연결하고, 안전성을 판단하는 framework까지 구축해야 했다.</p>
+
+    <blockquote>
+      <p><strong>비관론이 지적했던 어려운 문제들을 하나씩 engineering system으로 바꾸어 해결한 것이 Waymo의 긴 여정이었다고 보는 편이 더 정확하다.</strong></p>
+    </blockquote>
+
+    <hr />
+
+    <h2>그리고 이것은 자율주행만의 이야기가 아니다</h2>
+
+    <p>이 지점이 지금 Physical AI를 연구하는 우리에게 가장 중요하다.</p>
+
+    <p>Waymo는 특별한 자율주행 회사지만, 다른 관점에서는 <strong>Physical AI가 research demo에서 실제 product로 넘어갈 때 겪게 되는 문제를 가장 먼저 대규모로 경험한 회사</strong>라고 볼 수도 있다.</p>
+
+    <h3>Robot Manipulation</h3>
+
+    <p>새로운 VLA를 이용해 로봇이 빨래를 개는 멋진 demo를 만들었다고 해보자. 100번 가운데 90번 성공한다. 논문으로서는 상당히 좋은 결과일 수 있다.</p>
+
+    <p>그런데 이 기술을 세탁 공장이나 물류창고에 설치해 하루 10만 번 task를 수행한다면 이야기가 달라진다. 0.01% failure도 하루 열 번이다. 실제 환경에서는 젖은 옷, 서로 엉킨 물체, 예상하지 못한 재질, camera occlusion, grasp slip, tactile sensor noise가 계속 등장한다.</p>
+
+    <ul>
+      <li><strong>Agent:</strong> 어디를 잡고 어떤 trajectory와 force를 사용할 것인가?</li>
+      <li><strong>Simulator / World Model:</strong> 그렇게 잡으면 물체와 contact, tactile signal이 어떻게 변할 것인가?</li>
+      <li><strong>Critic:</strong> 성공했는가? 미끄러졌는가? 손상시켰는가? force가 너무 컸는가? 더 robust한 grasp가 있었는가?</li>
+      <li><strong>Eval:</strong> 어느 정도의 failure rate면 실제 고객에게 배포 가능한가?</li>
+    </ul>
+
+    <p>결국 Waymo와 같은 질문이 다시 나타난다.</p>
+
+    <h3>Humanoid</h3>
+
+    <ul>
+      <li><strong>Agent:</strong> walking + whole-body manipulation policy</li>
+      <li><strong>Simulator:</strong> body dynamics + contact + environment + human interaction</li>
+      <li><strong>Critic:</strong> fall risk + task success + collision + human safety + recoverability</li>
+    </ul>
+
+    <h3>Drone</h3>
+
+    <ul>
+      <li><strong>Agent:</strong> navigation + control</li>
+      <li><strong>Simulator:</strong> wind + obstacles + sensor degradation + moving objects</li>
+      <li><strong>Critic:</strong> collision risk + mission success + energy + localization confidence</li>
+    </ul>
+
+    <h3>Home / Assistive Robot</h3>
+
+    <ul>
+      <li><strong>Agent:</strong> navigation + manipulation + human interaction</li>
+      <li><strong>Simulator:</strong> household dynamics + object interaction + human behavior</li>
+      <li><strong>Critic:</strong> task success + human safety + social appropriateness + recovery 가능성</li>
+    </ul>
+
+    <p>그래서 Agent–Simulator–Critic은 자율주행만의 특수한 architecture라기보다, 여러 Physical AI 제품에서 반복해서 나타날 수 있는 <strong>일반적인 system pattern</strong>으로 볼 수 있다.</p>
+
+    <hr />
+
+    <h2>그리고 그 모든 것 위에 Eval이 있다</h2>
+
+    <p>Waymo 발표에서 개인적으로 가장 중요한 메시지 가운데 하나는 다음과 같다.</p>
+
+    <blockquote>
+      <p><strong>“If you cannot quantitatively define what good enough means, you are not really building a product. You are iterating on a demo.”</strong></p>
+    </blockquote>
+
+    <p>즉 <strong>“얼마나 좋아야 충분히 좋은가?”</strong>를 정의하지 못하면 제품을 만들고 있다고 보기 어렵다는 것이다.</p>
+
+    <div class="term-note">
+      <span class="term-title">용어 메모 — Eval(Evaluation)</span>
+      AI 시스템이 원하는 수준의 성능과 안전성을 달성했는지를 체계적으로 측정하는 과정이다. Physical AI에서 Eval은 논문의 benchmark 하나만을 뜻하지 않는다. Sensor, model, behavior, safety, operation까지 전체 시스템의 deployment readiness를 확인하는 의미가 더 강하다.
+    </div>
+
+    <p>Model을 바꾸었다. 정말 좋아졌는가? Dataset을 두 배 늘렸다. 어떤 failure가 줄었는가? Simulator가 더 realistic해졌다. 실제 safety improvement로 이어졌는가? Critic이 새로운 failure를 찾았다. 그것은 실제로 중요한 failure인가?</p>
+
+    <p>이 모든 것을 판단하는 기준이 Eval과 Metrics다.</p>
+
+    <p>Waymo도 2009년 프로젝트 시작 이후 기술뿐 아니라 operations와 조직적 절차까지 포함하는 safety framework를 오랫동안 발전시켜 왔다. 2020년 fully driverless public service를 공개할 때에도 이를 단순히 Driver model의 성능이 아니라 10년 이상 발전시킨 safety methodology의 결과로 설명했다.</p>
+
+    <p><strong>Physical AI에서 Eval은 논문 마지막 표에 들어가는 숫자가 아니라 제품 전체를 움직이는 steering wheel에 가깝다.</strong></p>
+
+    <hr />
+
+    <h2>창업에서는 무엇이 진짜 Moat가 될까?</h2>
+
+    <p>AI startup을 시작하면 흔히 이렇게 이야기한다.</p>
+
+    <blockquote>
+      <p>“우리 model이 더 좋습니다.”</p>
+      <p>“우리 architecture가 새롭습니다.”</p>
+      <p>“우리 foundation model이 더 큽니다.”</p>
+    </blockquote>
+
+    <p>초기에는 당연히 중요하다. 하지만 좋은 model architecture는 논문으로 공개되고, 좋은 아이디어는 경쟁사가 빠르게 따라온다. Foundation model 자체도 시간이 지나면서 commoditize될 수 있다.</p>
+
+    <div class="term-note">
+      <span class="term-title">용어 메모 — Moat(해자)</span>
+      경쟁사가 쉽게 따라올 수 없도록 만드는 지속적인 경쟁우위를 뜻하는 경영 용어다. 성 주변의 해자가 공격을 어렵게 만드는 데서 나온 표현이다.
+    </div>
+
+    <p>반면 복제하기 훨씬 어려운 것들이 있다.</p>
+
+    <ul>
+      <li>수년 동안 실제 고객 환경에서 축적된 data</li>
+      <li>중요한 failure case collection</li>
+      <li>실제 세계와 잘 맞는 Simulator</li>
+      <li>새로운 failure를 찾아내는 Critic</li>
+      <li>제품에 특화된 Eval과 Metrics</li>
+      <li>Safety validation infrastructure</li>
+      <li>실제 deployment 과정에서 얻어진 operational knowledge</li>
+      <li>그리고 이 모든 것을 연결하는 learning flywheel</li>
+    </ul>
+
+    <p>따라서 Physical AI startup에서 매우 중요한 질문은 “어떤 foundation model을 사용할 것인가?”만이 아니다.</p>
+
+    <blockquote>
+      <p><strong>“우리 회사의 learning flywheel은 무엇인가?”</strong></p>
+    </blockquote>
+
+    <p>고객이 제품을 사용할수록 새로운 data가 쌓이는가? 그 data로 Simulator가 좋아지는가? Simulator가 더 어려운 scenario를 만들어내는가? Critic이 Agent가 못하는 부분을 자동으로 찾아내는가? 그 결과 Agent가 개선되는가? 개선된 Agent가 더 많은 deployment를 가능하게 하는가?</p>
+
+    <p>이 순환이 돌아간다면 제품을 많이 판매할수록 기술도 강해진다. 그것이 강력한 business moat가 될 수 있다.</p>
+
+    <hr />
+
+    <h2>현재 Physical AI Boom을 볼 때 우리가 물어야 할 질문</h2>
+
+    <p>요즘 humanoid와 robot foundation model의 demo는 정말 인상적이다. 그리고 실제로 중요한 기술적 threshold를 넘어가고 있을 가능성이 높다. 그 가치를 과소평가할 이유는 없다.</p>
+
+    <p>하지만 자율주행의 역사는 한 가지 질문을 던진다.</p>
+
+    <blockquote>
+      <p>2010년대 초중반의 자율주행 데모를 보던 사람들도 지금 우리가 humanoid demo를 볼 때와 비슷한 느낌을 받지 않았을까?</p>
+      <p><strong>“이 정도면 거의 다 된 것 아닌가?”</strong></p>
+    </blockquote>
+
+    <p>실제로 중요한 breakthrough가 있었던 것은 맞다. 그러나 그것은 끝이 아니라 시작이었다.</p>
+
+    <p>그 이후에 기다리고 있었던 것은 수없이 많은 rare event, reliability 문제, validation, sensor redundancy, simulation, operational process, safety evaluation이었다.</p>
+
+    <p>그래서 지금 Physical AI demo를 볼 때에는 두 생각을 동시에 가질 필요가 있다고 생각한다.</p>
+
+    <blockquote>
+      <p><strong>첫째, 정말 중요한 기술적 전환점이 오고 있다.</strong></p>
+      <p><strong>둘째, 그렇다면 이제 다음 몇 개의 9를 어떻게 만들 것인가?</strong></p>
+    </blockquote>
+
+    <hr />
+
+    <h2>학생들에게 던지고 싶은 질문</h2>
+
+    <p>새로운 Physical AI 연구를 시작할 때 우리는 자연스럽게 “우리 Agent는 무엇인가?”라고 묻는다.</p>
+
+    <p>어떤 policy인가? 어떤 VLA인가? 어떤 architecture인가? 어떤 representation을 사용할 것인가?</p>
+
+    <p>물론 중요한 질문이다. 하지만 한 단계 더 나아가 다음 질문도 함께 했으면 한다.</p>
+
+    <h3>1. 우리의 Simulator는 무엇인가?</h3>
+    <p>실패를 실제 세계에서 기다리지 않고 만들어낼 수 있는가? Counterfactual을 생성할 수 있는가?</p>
+
+    <h3>2. 우리의 Critic은 무엇인가?</h3>
+    <p>Agent가 잘하고 있는지 누가 판단하는가? 단순 성공/실패보다 더 섬세한 quality를 측정할 수 있는가?</p>
+
+    <h3>3. 우리의 Eval은 무엇인가?</h3>
+    <p>어느 정도면 “good enough”라고 말할 것인가? 논문 benchmark를 넘어 실제 deployment readiness를 측정할 수 있는가?</p>
+
+    <h3>4. 우리의 Long Tail은 무엇인가?</h3>
+    <p>Scale이 1,000배 커졌을 때 지금은 보이지 않는 어떤 failure가 매일 발생하게 될 것인가?</p>
+
+    <h3>5. 우리의 Learning Flywheel은 무엇인가?</h3>
+    <p>Deployment가 많아질수록 제품이 자동으로 더 좋아지는 구조인가? 아니면 deployment가 늘어날수록 사람이 처리해야 할 exception만 늘어나는 구조인가?</p>
+
+    <hr />
+
+    <h2>연구와 창업에서 목표가 조금 다르다는 것도 기억했으면 한다</h2>
+
+    <p>논문에서는 <strong>novelty</strong>가 중요하다. 새로운 architecture나 learning algorithm, representation을 만드는 것 자체가 중요한 contribution일 수 있다.</p>
+
+    <p>하지만 product에서는 질문이 달라진다.</p>
+
+    <ul>
+      <li>새로운가?</li>
+      <li>수백만 번 반복해도 동작하는가?</li>
+      <li>실패했을 때 그것을 발견할 수 있는가?</li>
+      <li>왜 실패했는지 학습할 수 있는가?</li>
+      <li>같은 실패를 다시 하지 않도록 시스템이 개선되는가?</li>
+    </ul>
+
+    <p>따라서 연구 논문의 contribution이 Agent의 작은 부분이라 하더라도, <strong>그 기술이 전체 Agent–Simulator–Critic–Eval system 안에서 어디에 위치하는가</strong>를 생각해 보는 것은 좋은 연구 문제를 찾는 데도 도움이 될 수 있다.</p>
+
+    <hr />
+
+    <h2>Waymo가 보여준 가장 큰 교훈</h2>
+
+    <p>Waymo의 성과를 단순히 “자율주행 AI가 드디어 충분히 좋아졌다”고 해석하는 것은 아쉽다.</p>
+
+    <p>더 흥미로운 해석은 이것이다.</p>
+
+    <blockquote>
+      <p><strong>Physical AI를 현실 세계에 배포하려면 Model 자체뿐 아니라 Model이 계속 개선될 수 있는 전체 시스템을 만들어야 한다.</strong></p>
+    </blockquote>
+
+    <p>Agent가 행동한다.</p>
+    <p>Simulator가 가능한 미래를 만든다.</p>
+    <p>World Model이 행동과 세상의 변화를 연결한다.</p>
+    <p>Critic이 결과를 평가하고 약점을 발견한다.</p>
+    <p>Eval과 Metrics가 언제 충분히 좋아졌는지 판단한다.</p>
+    <p>Safety framework가 실제 deployment가 가능한지를 결정한다.</p>
+    <p>Real-world deployment가 다시 새로운 data를 가져온다.</p>
+    <p>그리고 그 data가 다시 전체 시스템을 개선한다.</p>
+
+    <hr />
+
+    <h2>맺으며</h2>
+
+    <p>2010년대 후반 여러 전문가가 자율주행의 빠른 상용화에 회의적이었다. 돌이켜보면 그들의 우려에는 상당한 근거가 있었다.</p>
+
+    <p>현실 세계의 long tail은 실제로 어려웠고, 안전성 검증 역시 어려웠으며, 인간과의 interaction도 어려웠다. 모든 장소와 날씨에서 인간 운전자처럼 동작하는 완전 범용 자율주행은 지금도 해결됐다고 말하기 어렵다.</p>
+
+    <p>그런데 Waymo가 보여 주는 흥미로운 점은 <strong>그 어려움이 곧 불가능함을 뜻하지는 않았다는 것</strong>이다.</p>
+
+    <p>문제를 적절한 ODD로 제한하고, sensor redundancy를 만들고, AI model을 발전시키고, 대규모 simulation과 World Model을 구축하고, Critic과 Eval을 만들고, Safety Framework를 갖추고, 실제 운행 data를 다시 학습으로 연결하는 flywheel을 십수 년 동안 만들어 가면서 자율주행은 조금씩 연구 데모에서 실제 서비스로 넘어왔다.</p>
+
+    <p>그래서 앞으로 Physical AI를 연구하거나 창업하려는 학생들에게 한 가지 질문을 던지고 싶다.</p>
+
+    <blockquote class="lead-quote">
+      <p>“우리의 Agent는 무엇인가?”만 묻지 말자.</p>
+      <p>“우리의 Simulator는 무엇인가?”</p>
+      <p>“우리의 Critic은 무엇인가?”</p>
+      <p>“무엇을 good enough라고 정의할 것인가?”</p>
+      <p>“그리고 이 모든 것이 어떻게 하나의 learning flywheel로 연결되는가?”</p>
+    </blockquote>
+
+    <p>좋은 demo를 만드는 것은 매우 중요하다. 모든 것은 거기에서 시작하기 때문이다.</p>
+
+    <p>하지만 자율주행의 지난 20년이 우리에게 보여 주듯,</p>
+
+    <blockquote>
+      <p><strong>Demo가 성공한 순간이 끝이 아니다.<br />Physical AI에서는 어쩌면 그 순간부터 진짜 일이 시작된다.</strong></p>
+    </blockquote>
+
+    <hr />
+
+    <h2 id="sources">References</h2>
+    <ol class="sources">
+      <li>DARPA, <a href="https://www.darpa.mil/about/innovation-timeline/grand-challenge">Grand Challenge</a> — 2004·2005 DARPA Grand Challenge와 초기 자율주행 발전의 공식 역사.</li>
+      <li>IEEE Spectrum, <a href="https://spectrum.ieee.org/the-rodney-brooks-rules-for-predicting-a-technologys-commercial-success">The Rodney Brooks Rules for Predicting a Technology’s Commercial Success</a> — 2010년대 후반 자율주행 상용화에 대한 신중한 전망을 이해하기 위한 참고 자료.</li>
+      <li>Waymo, <a href="https://waymo.com/blog/2020/10/waymo-is-opening-its-fully-driverless-service-in-phoenix/">Waymo is opening its fully driverless service to the general public in Phoenix</a>, 2020.10.08 — 일반 대중 대상 fully driverless 상용 서비스의 중요한 이정표.</li>
+      <li>Waymo, <a href="https://waymo.com/blog/2026/02/the-waymo-world-model-a-new-frontier-for-autonomous-driving-simulation/">The Waymo World Model: A New Frontier For Autonomous Driving Simulation</a>, 2026.02.06 — generative world model과 closed-loop simulation에 관한 자료.</li>
+      <li>Waymo, <a href="https://waymo.com/blog/2026/08/10ailessons/">10 AI Lessons from Driving 200+ Million Fully Autonomous Miles</a>, 2026.08.26 — Agent, Simulator, Critic, evaluation과 productization에 관한 이 글의 핵심 참고 자료.</li>
+      <li>Waymo, <a href="https://waymo.com/blog/2026/09/allianzpartnership/">Waymo and Allianz announce insurance partnership</a>, 2026.09 — 주 50만 회 이상의 유료 완전자율주행 탑승 등 최근 서비스 규모 참고.</li>
+    </ol>
+
+    <p class="small">Waymo의 운행 규모와 서비스 지역은 빠르게 변하고 있으므로, 위 수치는 이 글을 작성한 2026년 10월 시점의 공개 자료를 기준으로 한다.</p>
+
+    <p class="disclaimer"><a href="https://sungeui.github.io/essays/disclaimer.html"><strong>Disclaimer</strong></a></p>
+  </main>
+</body>
+</html>
